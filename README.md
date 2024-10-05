@@ -13,7 +13,7 @@ You can add **Toastify** to your project by using Swift Package Manager:
 
 1. Open your Xcode project.
 2. Go to `File > Swift Packages > Add Package Dependency`.
-3. Enter the repository URL for **Toastify** (e.g., `https://github.com/YourUserName/Toastify.git`).
+3. Enter the repository URL for **Toastify** (e.g., `https://github.com/vasantp20/Toastify.git`).
 4. Follow the prompts to add the package.
 
 ### 2. **Manual Installation**
