@@ -53,6 +53,40 @@ public class ToastManager {
             }
         }
     }
+    
+    // Method to show a toast with a custom view
+    public func showToast<V: ToastViewProtocol>(toastView: V, duration: TimeInterval = 2.0) {
+        guard let window = UIApplication.shared.windows.first else { return }
+        
+        // Create a UIHostingController to host the custom SwiftUI toast view
+        let hostingController = UIHostingController(rootView: toastView)
+        hostingController.view.backgroundColor = .clear
+        
+        // Add the hosting controller's view to the window
+        window.addSubview(hostingController.view)
+        
+        // Set initial constraints and position
+        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+        NSLayoutConstraint.activate([
+            hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: 40),
+            hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -40),
+            hostingController.view.bottomAnchor.constraint(equalTo: window.bottomAnchor, constant: -100)
+        ])
+        
+        // Animate the toast view and remove it after the duration
+        hostingController.view.alpha = 0
+        UIView.animate(withDuration: 0.5, animations: {
+            hostingController.view.alpha = 1
+        }, completion: { _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
+                UIView.animate(withDuration: 0.5, animations: {
+                    hostingController.view.alpha = 0
+                }, completion: { _ in
+                    hostingController.view.removeFromSuperview()
+                })
+            }
+        })
+    }
 
     public func hideToast() {
         // Hide and remove toast
