@@ -7,6 +7,10 @@
 
 import UIKit
 import SwiftUI
+public enum Position {
+    case top
+    case bottom
+}
 
 public class ToastManager {
     public static let shared = ToastManager()
@@ -55,7 +59,7 @@ public class ToastManager {
     }
     
     // Method to show a toast with a custom view
-    public func showToast<V: ToastViewProtocol>(toastView: V, duration: TimeInterval = 2.0) {
+    public func showToast<V: ToastViewProtocol>(toastView: V, duration: TimeInterval = 3.0, position: Position = .top, padding: CGFloat = 20) {
         guard let window = UIApplication.shared.windows.first else { return }
         
         // Create a UIHostingController to host the custom SwiftUI toast view
@@ -67,11 +71,20 @@ public class ToastManager {
         
         // Set initial constraints and position
         hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        NSLayoutConstraint.activate([
-            hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: 40),
-            hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -40),
-            hostingController.view.bottomAnchor.constraint(equalTo: window.bottomAnchor, constant: -100)
-        ])
+        switch position {
+        case .top:
+            NSLayoutConstraint.activate([
+                hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: padding),
+                hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -padding),
+                hostingController.view.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 20)
+            ])
+        case .bottom:
+            NSLayoutConstraint.activate([
+                hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: padding),
+                hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -padding),
+                hostingController.view.bottomAnchor.constraint(equalTo: window.bottomAnchor, constant: -100)
+            ])
+        }
         
         // Animate the toast view and remove it after the duration
         hostingController.view.alpha = 0
