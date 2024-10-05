@@ -97,10 +97,6 @@ Button("Navigate and Toast") {
 ---
 
 ## **Customization**
-# **Toastify Documentation Update**
-
-## **Overview**
-
 Toastify now supports customizable toast views, allowing developers to pass in their own SwiftUI views for toast messages. This new functionality provides more flexibility for designing toast messages, making it easier to adapt Toastify for different use cases.
 
 ---
