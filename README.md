@@ -1,5 +1,3 @@
-# Toastify
-
 # **Toastify Documentation**
 
 ## **Overview**
@@ -99,70 +97,164 @@ Button("Navigate and Toast") {
 ---
 
 ## **Customization**
+# **Toastify Documentation Update**
 
-### **ToastView**
+## **Overview**
 
-To create your own toast view, you can customize the `ToastView` provided in the framework:
+Toastify now supports customizable toast views, allowing developers to pass in their own SwiftUI views for toast messages. This new functionality provides more flexibility for designing toast messages, making it easier to adapt Toastify for different use cases.
+
+---
+
+## **New `showToast` Method**
+
+### **Purpose**
+The new `showToast` method allows you to display a custom view that conforms to the `ToastViewProtocol`. This gives you full control over the design and behavior of the toast while using the Toastify framework to manage the display and dismissal.
+
+---
+
+## **Method Signature**
 
 ```swift
-import SwiftUI
+public func showToast<V: ToastViewProtocol>(
+    toastView: V,
+    duration: TimeInterval = 2.0
+)
+```
 
-public struct ToastView: View {
-    public var message: String
-    public var backgroundColor: Color
-    public var textColor: Color
-    public var cornerRadius: CGFloat
+### **Parameters**
+- `toastView`: A SwiftUI view conforming to the `ToastViewProtocol` that will be displayed as the toast message.
+- `duration`: The time (in seconds) for which the toast will be visible. Defaults to `2.0` seconds.
 
-    public init(message: String,
-                backgroundColor: Color = .black.opacity(0.8),
-                textColor: Color = .white,
-                cornerRadius: CGFloat = 8.0) {
-        self.message = message
-        self.backgroundColor = backgroundColor
-        self.textColor = textColor
-        self.cornerRadius = cornerRadius
-    }
+### **Usage Example**
 
-    public var body: some View {
+```swift
+struct CustomToastView: ToastViewProtocol {
+    var message: String
+    
+    var body: some View {
         Text(message)
-            .foregroundColor(textColor)
             .padding()
-            .background(backgroundColor)
-            .cornerRadius(cornerRadius)
-            .padding(.horizontal, 40)
+            .background(Color.blue)
+            .foregroundColor(.white)
+            .cornerRadius(10)
+            .shadow(radius: 10)
+    }
+}
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Button("Show Custom Toast") {
+                let customToast = CustomToastView(message: "This is a custom toast!")
+                ToastManager.shared.showToast(toastView: customToast, duration: 3.0)
+            }
+        }
+    }
+}
+```
+
+---
+
+## **Creating Custom Toast Views**
+
+### **Conforming to `ToastViewProtocol`**
+To create a custom toast view, your view must conform to the `ToastViewProtocol`, which is essentially a protocol for SwiftUI views.
+
+Example:
+
+```swift
+struct CustomToastView: ToastViewProtocol {
+    var message: String
+
+    var body: some View {
+        Text(message)
+            .font(.headline)
+            .padding()
+            .background(Color.red.opacity(0.8))
+            .cornerRadius(12)
             .shadow(radius: 10)
     }
 }
 ```
 
-### **Appearance**
+In this example:
+- `CustomToastView` defines a toast with a red background and rounded corners.
+- You can customize this view further by adding images, icons, or other UI elements as needed.
 
-Toasts can have flexible appearances by modifying properties like corner radius, background color, and shadow. Here’s how you can adjust these properties:
+---
+
+## **Advanced Customization**
+
+This new method opens up several possibilities for designing toasts:
+
+1. **Multi-Line Text Toasts**:
+   You can create multi-line text messages or even embed more complex UI elements like images or buttons.
+
+2. **Interactive Toasts**:
+   You can use the standard SwiftUI gestures (e.g., `onTapGesture`) for interaction, enabling users to dismiss the toast or perform actions.
+
+3. **Dynamic Toasts**:
+   Toasts can be dynamically customized based on the state of your app, making them highly versatile for real-time feedback or notifications.
+
+### Example: Multi-Line Text Toast
 
 ```swift
-ToastManager.shared.showToast(
-    message: "Styled Toast",
-    backgroundColor: .green,
-    textColor: .black,
-    cornerRadius: 12.0
-)
+struct MultiLineToastView: ToastViewProtocol {
+    var title: String
+    var subtitle: String
+
+    var body: some View {
+        VStack {
+            Text(title).font(.headline)
+            Text(subtitle).font(.subheadline)
+        }
+        .padding()
+        .background(Color.gray.opacity(0.8))
+        .cornerRadius(10)
+        .shadow(radius: 5)
+    }
+}
+```
+
+### Example: Interactive Toast
+
+```swift
+struct InteractiveToastView: ToastViewProtocol {
+    var message: String
+
+    var body: some View {
+        Text(message)
+            .padding()
+            .background(Color.green)
+            .cornerRadius(8)
+            .onTapGesture {
+                print("Toast tapped!")
+            }
+    }
+}
 ```
 
 ---
 
-## **Advanced**
+## **How It Works**
 
-### **Handling Orientation Changes**
+The `showToast(toastView:)` method does the following:
+1. **Adds a custom SwiftUI view** to the app’s root window, ensuring it stays visible even during navigation.
+2. **Handles animations** for showing and dismissing the toast.
+3. **Supports time-based dismissal**, automatically removing the toast after the specified duration.
 
-To ensure the toast stays correctly positioned during orientation changes, **Toastify** listens for orientation change notifications and adjusts the constraints of the toast view dynamically:
+---
 
-```swift
-NotificationCenter.default.addObserver(self, selector: #selector(handleOrientationChange), name: UIDevice.orientationDidChangeNotification, object: nil)
+## **Additional Notes**
+- The custom toast view will always appear on top of the app's content, even during navigation.
+- The animation ensures a smooth fade-in and fade-out effect, providing an intuitive user experience.
 
-@objc private func handleOrientationChange() {
-    // Update toast constraints if needed
-}
-```
+---
+
+## **Conclusion**
+
+This new `showToast` method provides the flexibility to create a wide range of toast messages using your custom views. By conforming to the `ToastViewProtocol`, you can now fully customize the UI, making **Toastify** adaptable to your app’s specific needs while still benefiting from Toastify's simplified toast management.
+
 
 ### **Persistence Across Transitions**
 
