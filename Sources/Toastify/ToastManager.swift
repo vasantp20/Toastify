@@ -16,8 +16,11 @@ public class ToastManager {
     public static let shared = ToastManager()
     
     private var toastController: UIViewController?
+    private let operationQueue = OperationQueue()
 
-    private init() {}
+    private init() {
+        operationQueue.maxConcurrentOperationCount = 1
+    }
 
     public func showToast(message: String, duration: Double = 2.0) {
         guard let window = UIApplication.shared.windows.first else { return }
@@ -60,45 +63,8 @@ public class ToastManager {
     
     // Method to show a toast with a custom view
     public func showToast<V: ToastViewProtocol>(toastView: V, duration: TimeInterval = 3.0, position: Position = .top, padding: CGFloat = 20) {
-        guard let window = UIApplication.shared.windows.first else { return }
-        
-        // Create a UIHostingController to host the custom SwiftUI toast view
-        let hostingController = UIHostingController(rootView: toastView)
-        hostingController.view.backgroundColor = .clear
-        
-        // Add the hosting controller's view to the window
-        window.addSubview(hostingController.view)
-        
-        // Set initial constraints and position
-        hostingController.view.translatesAutoresizingMaskIntoConstraints = false
-        switch position {
-        case .top:
-            NSLayoutConstraint.activate([
-                hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: padding),
-                hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -padding),
-                hostingController.view.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 20)
-            ])
-        case .bottom:
-            NSLayoutConstraint.activate([
-                hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: padding),
-                hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -padding),
-                hostingController.view.bottomAnchor.constraint(equalTo: window.bottomAnchor, constant: -100)
-            ])
-        }
-        
-        // Animate the toast view and remove it after the duration
-        hostingController.view.alpha = 0
-        UIView.animate(withDuration: 0.5, animations: {
-            hostingController.view.alpha = 1
-        }, completion: { _ in
-            DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
-                UIView.animate(withDuration: 0.5, animations: {
-                    hostingController.view.alpha = 0
-                }, completion: { _ in
-                    hostingController.view.removeFromSuperview()
-                })
-            }
-        })
+       let operation = ShowToastOperation(toastView: toastView, duration: duration, position: position, padding: padding)
+        self.operationQueue.addOperations([operation], waitUntilFinished: false)
     }
 
     public func hideToast() {
@@ -112,5 +78,183 @@ public class ToastManager {
                 self.toastController = nil
             }
         }
+    }
+}
+
+class ShowToastOperation: Operation {
+    
+    private let hostingController: UIViewController
+    private let duration: TimeInterval
+    private let position: Position
+    private let padding: CGFloat
+    private var topConstraint: NSLayoutConstraint?
+    
+    override var isAsynchronous: Bool {
+        return true
+    }
+    
+    private var _isExecuting: Bool = false {
+        willSet {
+            willChangeValue(forKey: "isExecuting")
+        }
+        didSet {
+            didChangeValue(forKey: "isExecuting")
+        }
+    }
+    private var _isFinished: Bool = false {
+        willSet {
+            willChangeValue(forKey: "isFinished")
+        }
+        didSet {
+            didChangeValue(forKey: "isFinished")
+        }
+    }
+    
+    init<V: ToastViewProtocol>(toastView: V, duration: TimeInterval = 3.0, position: Position = .top, padding: CGFloat = 20) {
+        let hostingController = UIHostingController(rootView: toastView)
+        self.hostingController = hostingController
+        self.duration = duration
+        self.position = position
+        self.padding = padding
+        
+    }
+    
+    override var isExecuting: Bool {
+            return _isExecuting
+    }
+    
+    override var isFinished: Bool {
+            return _isFinished
+    }
+    
+    override func main() {
+
+        if _isFinished { return }
+        _isExecuting = true
+        
+       
+        DispatchQueue.main.async {
+            guard let window = UIApplication.shared.windows.first else { return }
+
+            self.hostingController.view.backgroundColor = .clear
+
+            // Add the hosting controller's view to the window
+
+            window.addSubview(self.hostingController.view)
+            
+            // Set up swipe gesture recognizer
+            let swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handlePanGesture(_:)))
+            self.hostingController.view.addGestureRecognizer(swipeGesture)
+            
+            // Set initial constraints and position
+            self.hostingController.view.translatesAutoresizingMaskIntoConstraints = false
+            switch self.position {
+            case .top:
+                self.topConstraint = self.hostingController.view.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 24)
+                NSLayoutConstraint.activate([
+                    self.hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: self.padding),
+                    self.hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -self.padding),
+                    self.topConstraint!
+                ])
+            case .bottom:
+                NSLayoutConstraint.activate([
+                    self.hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: self.padding),
+                    self.hostingController.view.trailingAnchor.constraint(equalTo: window.trailingAnchor, constant: -self.padding),
+                    self.hostingController.view.bottomAnchor.constraint(equalTo: window.bottomAnchor, constant: -100)
+                ])
+            }
+
+
+            // Animate the toast view and remove it after the duration
+            self.hostingController.view.alpha = 0
+            UIView.animate(withDuration: 0.5, animations: { [weak self] in
+                self?.hostingController.view.alpha = 1
+            }, completion: { _ in
+                DispatchQueue.main.asyncAfter(deadline: .now() + self.duration) { [weak self] in
+                    UIView.animate(withDuration: 0.5, animations: {
+                        self?.hostingController.view.alpha = 0
+                    }, completion: { _ in
+                        guard let self = self else { return }
+                        self.hostingController.view.removeFromSuperview()
+                        self.finishOperation()
+                        
+                    })
+                }
+            })
+        }
+    }
+    
+    // Handle swipe-up gesture
+    @objc private func handlePanGesture(_ gesture: UIPanGestureRecognizer) {
+        let translation = gesture.translation(in: self.hostingController.view)
+
+        // Check if the user has swiped up (negative Y translation)
+        if gesture.state == .ended && translation.y < 0 {
+            dismissToastWithSlide()
+        }
+    }
+    
+    // Helper to dismiss the toast with slide-up animation
+    private func dismissToastWithSlide() {
+        guard let view = self.hostingController.view else { return }
+
+        UIView.animate(withDuration: 1, animations: {
+            // Move the toast view off-screen (slide up)
+            self.topConstraint?.constant = -view.frame.height-100
+        }, completion: { _ in
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                view.removeFromSuperview()
+                self.finishOperation()
+            }
+        })
+    }
+    
+    // Helper to dismiss the toast and mark the operation as finished
+    private func dismissToast() {
+        UIView.animate(withDuration: 0.5, animations: {
+            self.hostingController.view.alpha = 0
+        }, completion: { _ in
+            self.hostingController.view.removeFromSuperview()
+            self.finishOperation()
+        })
+    }
+    
+    // Helper to mark the operation as complete
+    private func finishOperation() {
+        _isExecuting = false
+        _isFinished = true
+    }
+}
+
+
+
+public struct CustomToastView: ToastViewProtocol {
+    let title: String
+    let message: String
+    
+    public init(title: String, message: String) {
+        self.title = title
+        self.message = message
+    }
+    
+    public var body: some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(title)
+                .padding([.top], 12)
+                .foregroundColor(.white)
+                .font(.headline)
+                
+
+            Text(message)
+                .padding([.top, .bottom], 4)
+                .foregroundColor(.white)
+                .font(.subheadline)
+        }
+        .padding()
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.blue)
+        .cornerRadius(20)
+        .shadow(radius: 10)
+        .padding(.horizontal, 4)
     }
 }
