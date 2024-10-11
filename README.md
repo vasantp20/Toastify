@@ -4,7 +4,6 @@
 
 **Toastify** is a lightweight SwiftUI framework designed to display customizable toast messages across the app. It supports persistent toasts that stay visible even when navigating between screens. This framework makes it easy to add non-intrusive, brief notifications that enhance user interaction without disrupting the app's flow.
 
----
 
 ## **Installation**
 
@@ -21,8 +20,6 @@ To manually add **Toastify** to your project:
 1. Clone the repository.
 2. Drag the `Toastify` folder into your Xcode project.
 3. Ensure that `Toastify` is listed under the `Link Binary with Libraries` section in your target's settings.
-
----
 
 ## **Usage**
 
@@ -44,12 +41,9 @@ struct ContentView: View {
 }
 ```
 
----
-
 ## **Creating Custom Toast Views**
 Toastify now supports customizable toast views, allowing developers to pass in their own SwiftUI views for toast messages. This new functionality provides more flexibility for designing toast messages, making it easier to adapt Toastify for different use cases.
 
----
 
 
 ### **Conforming to `ToastViewProtocol`**
@@ -87,7 +81,6 @@ In this example:
 - `CustomToastView` defines a toast with a red background and rounded corners.
 - You can customize this view further by adding images, icons, or other UI elements as needed.
 
----
 
 ## **How It Works**
 
@@ -96,7 +89,6 @@ The `showToast(toastView:)` method does the following:
 2. **Handles animations** for showing and dismissing the toast.
 3. **Supports time-based dismissal**, automatically removing the toast after the specified duration.
 
----
 
 ### **Example with Navigation**
 
@@ -110,35 +102,20 @@ Button("Navigate and Toast") {
     UIApplication.shared.windows.first?.rootViewController?.present(nextVC, animated: true)
 }
 ```
----
+
 
 ## **Additional Notes**
 - The custom toast view will always appear on top of the app's content, even during navigation.
 - The animation ensures a smooth fade-in and fade-out effect, providing an intuitive user experience.
 
----
 
-## **Conclusion**
-
-This new `showToast` method provides the flexibility to create a wide range of toast messages using your custom views. By conforming to the `ToastViewProtocol`, you can now fully customize the UI, making **Toastify** adaptable to your app’s specific needs while still benefiting from Toastify's simplified toast management.
-
-
-### **Persistence Across Transitions**
-
-The framework attaches the toast at the root window level, which ensures that the toast remains visible during view transitions and modal presentations. This provides a persistent messaging system that isn’t tied to individual view controllers.
-
----
 
 ## **Contributing**
 
 We welcome contributions to **Toastify**! Feel free to submit pull requests, report issues, or suggest new features. Before contributing, please review the [contribution guidelines](CONTRIBUTING.md).
 
----
 
 ## **License**
 
 **Toastify** is licensed under the MIT License. See the [LICENSE](LICENSE) file for details.
 
----
-
-By following these steps, you’ll be able to integrate **Toastify** into your project and customize it to meet your app’s notification needs.
