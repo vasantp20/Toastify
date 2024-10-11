@@ -44,37 +44,9 @@ struct ContentView: View {
 }
 ```
 
-### **Customizing the Toast**
-
-You can also customize the appearance of the toast by passing additional parameters such as background color, text color, and font:
-
-```swift
-ToastManager.shared.showToast(
-    message: "Custom Toast",
-    backgroundColor: .blue,
-    textColor: .white,
-    duration: 3.0,
-    font: .headline
-)
-```
-
-#### Parameters:
-- `message`: The message text displayed in the toast.
-- `backgroundColor`: The background color of the toast (default is `.black.opacity(0.8)`).
-- `textColor`: The color of the message text (default is `.white`).
-- `duration`: How long the toast will be visible (default is 2 seconds).
-- `font`: The font used for the message (default is `.body`).
-
----
-
-## **Toast Behavior**
-
-### **Persistent Toasts**
-Toastify displays toasts globally by attaching them to the root window of the app, ensuring they remain visible across different view controllers or navigation transitions.
 
 ### **Manually Dismissing a Toast**
 You can allow users to manually dismiss the toast by tapping on it. The `onTapGesture` can be added within the `ToastView`:
-
 ```swift
 ToastManager.shared.showToast(message: "Tap to dismiss!") {
     print("Toast dismissed!")
@@ -176,59 +148,6 @@ struct CustomToastView: ToastViewProtocol {
 In this example:
 - `CustomToastView` defines a toast with a red background and rounded corners.
 - You can customize this view further by adding images, icons, or other UI elements as needed.
-
----
-
-## **Advanced Customization**
-
-This new method opens up several possibilities for designing toasts:
-
-1. **Multi-Line Text Toasts**:
-   You can create multi-line text messages or even embed more complex UI elements like images or buttons.
-
-2. **Interactive Toasts**:
-   You can use the standard SwiftUI gestures (e.g., `onTapGesture`) for interaction, enabling users to dismiss the toast or perform actions.
-
-3. **Dynamic Toasts**:
-   Toasts can be dynamically customized based on the state of your app, making them highly versatile for real-time feedback or notifications.
-
-### Example: Multi-Line Text Toast
-
-```swift
-struct MultiLineToastView: ToastViewProtocol {
-    var title: String
-    var subtitle: String
-
-    var body: some View {
-        VStack {
-            Text(title).font(.headline)
-            Text(subtitle).font(.subheadline)
-        }
-        .padding()
-        .background(Color.gray.opacity(0.8))
-        .cornerRadius(10)
-        .shadow(radius: 5)
-    }
-}
-```
-
-### Example: Interactive Toast
-
-```swift
-struct InteractiveToastView: ToastViewProtocol {
-    var message: String
-
-    var body: some View {
-        Text(message)
-            .padding()
-            .background(Color.green)
-            .cornerRadius(8)
-            .onTapGesture {
-                print("Toast tapped!")
-            }
-    }
-}
-```
 
 ---
 
