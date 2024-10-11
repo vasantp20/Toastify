@@ -44,86 +44,13 @@ struct ContentView: View {
 }
 ```
 
-
-### **Manually Dismissing a Toast**
-You can allow users to manually dismiss the toast by tapping on it. The `onTapGesture` can be added within the `ToastView`:
-```swift
-ToastManager.shared.showToast(message: "Tap to dismiss!") {
-    print("Toast dismissed!")
-}
-```
-
-### **Example with Navigation**
-
-Even during navigation, toasts persist at the window level. You can display a toast before navigating to a new screen, and the message will remain visible:
-
-```swift
-Button("Navigate and Toast") {
-    ToastManager.shared.showToast(message: "Navigating!")
-    // Navigate to the next view
-    let nextVC = UIHostingController(rootView: NextView())
-    UIApplication.shared.windows.first?.rootViewController?.present(nextVC, animated: true)
-}
-```
-
 ---
 
-## **Customization**
+## **Creating Custom Toast Views**
 Toastify now supports customizable toast views, allowing developers to pass in their own SwiftUI views for toast messages. This new functionality provides more flexibility for designing toast messages, making it easier to adapt Toastify for different use cases.
 
 ---
 
-## **New `showToast` Method**
-
-### **Purpose**
-The new `showToast` method allows you to display a custom view that conforms to the `ToastViewProtocol`. This gives you full control over the design and behavior of the toast while using the Toastify framework to manage the display and dismissal.
-
----
-
-## **Method Signature**
-
-```swift
-public func showToast<V: ToastViewProtocol>(
-    toastView: V,
-    duration: TimeInterval = 2.0
-)
-```
-
-### **Parameters**
-- `toastView`: A SwiftUI view conforming to the `ToastViewProtocol` that will be displayed as the toast message.
-- `duration`: The time (in seconds) for which the toast will be visible. Defaults to `2.0` seconds.
-
-### **Usage Example**
-
-```swift
-struct CustomToastView: ToastViewProtocol {
-    var message: String
-    
-    var body: some View {
-        Text(message)
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(10)
-            .shadow(radius: 10)
-    }
-}
-
-struct ContentView: View {
-    var body: some View {
-        VStack {
-            Button("Show Custom Toast") {
-                let customToast = CustomToastView(message: "This is a custom toast!")
-                ToastManager.shared.showToast(toastView: customToast, duration: 3.0)
-            }
-        }
-    }
-}
-```
-
----
-
-## **Creating Custom Toast Views**
 
 ### **Conforming to `ToastViewProtocol`**
 To create a custom toast view, your view must conform to the `ToastViewProtocol`, which is essentially a protocol for SwiftUI views.
@@ -143,6 +70,17 @@ struct CustomToastView: ToastViewProtocol {
             .shadow(radius: 10)
     }
 }
+
+struct ContentView: View {
+    var body: some View {
+        VStack {
+            Button("Show Custom Toast") {
+                let customToast = CustomToastView(message: "This is a custom toast!")
+                ToastManager.shared.showToast(toastView: customToast, duration: 3.0)
+            }
+        }
+    }
+}
 ```
 
 In this example:
@@ -158,6 +96,20 @@ The `showToast(toastView:)` method does the following:
 2. **Handles animations** for showing and dismissing the toast.
 3. **Supports time-based dismissal**, automatically removing the toast after the specified duration.
 
+---
+
+### **Example with Navigation**
+
+Even during navigation, toasts persist at the window level. You can display a toast before navigating to a new screen, and the message will remain visible:
+
+```swift
+Button("Navigate and Toast") {
+    ToastManager.shared.showToast(message: "Navigating!")
+    // Navigate to the next view
+    let nextVC = UIHostingController(rootView: NextView())
+    UIApplication.shared.windows.first?.rootViewController?.present(nextVC, animated: true)
+}
+```
 ---
 
 ## **Additional Notes**
