@@ -142,14 +142,14 @@ class ShowToastOperation: Operation {
 
             window.addSubview(self.hostingController.view)
             
-            // Set up swipe gesture recognizer
-            let swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handlePanGesture(_:)))
-            self.hostingController.view.addGestureRecognizer(swipeGesture)
-            
             // Set initial constraints and position
             self.hostingController.view.translatesAutoresizingMaskIntoConstraints = false
             switch self.position {
             case .top:
+                // Set up swipe gesture recognizer
+                let swipeGesture = UIPanGestureRecognizer(target: self, action: #selector(self.handlePanGesture(_:)))
+                self.hostingController.view.addGestureRecognizer(swipeGesture)
+                
                 self.topConstraint = self.hostingController.view.topAnchor.constraint(equalTo: window.safeAreaLayoutGuide.topAnchor, constant: 24)
                 NSLayoutConstraint.activate([
                     self.hostingController.view.leadingAnchor.constraint(equalTo: window.leadingAnchor, constant: self.padding),
@@ -225,36 +225,8 @@ class ShowToastOperation: Operation {
         _isFinished = true
     }
 }
-
-
-
-public struct CustomToastView: ToastViewProtocol {
-    let title: String
-    let message: String
-    
-    public init(title: String, message: String) {
-        self.title = title
-        self.message = message
-    }
-    
-    public var body: some View {
-        VStack(alignment: .leading, spacing: 2) {
-            Text(title)
-                .padding([.top], 12)
-                .foregroundColor(.white)
-                .font(.headline)
-                
-
-            Text(message)
-                .padding([.top, .bottom], 4)
-                .foregroundColor(.white)
-                .font(.subheadline)
-        }
-        .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color.blue)
-        .cornerRadius(20)
-        .shadow(radius: 10)
-        .padding(.horizontal, 4)
+public extension ToastViewProtocol {
+    func close() {
+        
     }
 }
